@@ -2,14 +2,19 @@
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 const config = require("./config.json");
+const paddyID = "177562182463127563";
 
 bot.on("ready", () => {
   console.log(`Bot has started, with ${bot.users.size} users, in ${bot.channels.size} channels of ${bot.guilds.size} guilds.`); 
   bot.user.setActivity(`Serving ${bot.guilds.size} servers`);
 });
 
+bot.on("raw", console.log);
+
 bot.on("guildCreate", guild => {
   console.log(`New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
+  currGuild = guild.id;
+  console.log("current guild id: ", guild.id);
   bot.user.setActivity(`Serving ${bot.guilds.size} servers`);
 });
 
@@ -22,6 +27,8 @@ bot.on("guildDelete", guild => {
 bot.on("message", async message => {
     
   if(message.author.bot) return;
+
+  //if(message.author.id !== 177280495317549056) return;
   
   if(message.content.indexOf(config.prefix) !== 0) return;
   
@@ -31,6 +38,18 @@ bot.on("message", async message => {
   if(command === "ping") {
     const m = await message.channel.send("Ping?");
     m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(bot.ping)}ms`);
+  }
+
+  if(command === "console.log") {
+
+  }
+
+  if(command === "console") {
+    var currGuild = bot.guilds.find(guild => guild.id === paddyID);
+    var egan = currGuild.members.find(member => member.displayName === "poggers").user;
+    console.log("Egan: ",egan);
+    const m = await message.channel.send("Loading..");
+    m.edit(`Command executed`);
   }
   
   if(command === "say") {
