@@ -63,10 +63,33 @@ bot.on("message", async message => {
     message.delete().catch(O_o=>{}); 
     message.channel.send(sayMessage);
   }
+  
+  if(command === "stop"){
+    let member = message.mentions.members.first().speaking;
+    
+    if(member) 
+      console.log("Annoying member: ", member);
+  } 
 
-  if(command === "help") {
-    await message.channel.send("Ya aint gonna get any help here!");
-  }
+  if(command === "move"){
+    if(args){
+      console.log(args);
+      console.log(typeof(args[0]));
+    }
+    // if(message.mentions.users.size != 1 && message.mentions.users.size != 1){
+    //   await message.channel.send(`${message.author}, Please specify the correct arguments for the .move command`);
+    //   return;
+    // }
+
+    // if(channelType === "voice"){
+    //   console.log(typeof(message.mentions.users.first()));
+    // }
+  } 
+
+  if(command === "stop"){
+    let member = message.mentions.members.first().speaking;
+    console.log("Annoying member: ", member);
+  } 
   
   if(command === "kick") {
     if(!message.member.roles.some(r=>["Server Owner"].includes(r.name)) )
@@ -77,9 +100,7 @@ bot.on("message", async message => {
       return message.reply("Please mention a valid member of this server");
     if(!member.kickable) 
       return message.reply("I cannot kick this user! Do they have a higher role? Do I have kick permissions?");
-    
-    // slice(1) removes the first part, which here should be the user mention or ID
-    // join(' ') takes all the various parts to make it a single string.
+
     let reason = args.slice(1).join(' ');
     if(!reason) reason = "No reason provided";
     
