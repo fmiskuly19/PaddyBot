@@ -1,7 +1,6 @@
 {
   "name": "PaddyBot",
   "version": "1.0.0",
-  "description": "",
   "main": "bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -19,5 +18,7 @@
   "homepage": "https://github.com/fmiskuly19/PaddyBot#readme",
   "dependencies": {
     "discord.js": "^11.4.2"
-  }
+  },
+  "devDependencies": {},
+  "description": ""
 }
