@@ -1,4 +1,3 @@
-// Load up the discord.js library
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 const config = require("./config.json");
@@ -8,18 +7,8 @@ bot.on("ready", () => {
   bot.user.setActivity(`Serving ${bot.guilds.size} servers`);
 });
 
-// bot.on("raw", (o) => {
-//   console.log(o);
-// });
-
-// bot.on("PRESENCE_UPDATE", (packet) => {
-//   console.log(`User with ID ${packet.d.user.id} has changed their presence.`);
-//   message.channel.send(`User with ID ${packet.d.user.id} has changed their presence.`);
-// });
-
-// bot.on("VOICE_STATE_UPDATE", async (packet) => {
-//   console.log(`User with ID ${packet.d.member.nick} has caused a voice_state_update.`);
-//   await message.channel.send(`User with ID ${packet.d.member.nick} has caused a voice_state_update.`);
+// bot.on("raw", (output) => {
+//   console.log(output);
 // });
 
 bot.on("guildCreate", guild => {
@@ -48,8 +37,6 @@ bot.on("message", async message => {
   const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
   const command = args.shift().toLowerCase();
   const currentGuild = message.guild;
-
-  await message.reply(`Command received`);
   
   if(command === "ping") {
     const m = await message.channel.send("Ping?");
@@ -61,11 +48,6 @@ bot.on("message", async message => {
     message.delete().catch(O_o=>{}); 
     message.channel.send(sayMessage);
   }
-
-  if(command === "stop"){
-    let member = message.mentions.members.first().speaking;
-    console.log("Annoying member: ", member);
-  } 
   
   if(command === "kick") {
     if(!message.member.roles.some(r=>["Server Owner"].includes(r.name)) )
@@ -156,7 +138,8 @@ bot.on("message", async message => {
     }
 
     member.setVoiceChannel(selectedChannel.id)
-      .then(() => message.channel.send(`Moved ${member} to voice channel ${channelName}`));
+      .then(() => message.channel.send(`Moved ${member} to voice channel ${channelName}`))
+      .error(console.log);
 
   } 
 
@@ -165,8 +148,11 @@ bot.on("message", async message => {
     
     if(!member) 
       return message.reply(`Please mention a valid server member`);
+    else if(member.mute){
+      return message.reply(`Server member is already muted`);
+    }
     
-    member.setMute(true, 'ur annoying');
+    member.setMute(true);
   }
 });
 
