@@ -3,11 +3,6 @@ const Discord = require("discord.js");
 const bot = new Discord.Client();
 const config = require("./config.json");
 
-//faux instance variables
-
-//what is the solution for this? How can I access the current guild without creating global variables
-const paddyID = "177562182463127563";
-
 bot.on("ready", () => {
   console.log(`bot has started, with ${bot.users.size} users, in ${bot.channels.size} channels of ${bot.guilds.size} guilds.`); 
   bot.user.setActivity(`Serving ${bot.guilds.size} servers`);
@@ -43,19 +38,22 @@ bot.on("message", async message => {
   if(message.author.bot) return;
   
   if(message.content.indexOf(config.prefix) !== 0) return;
+
+  //we dont want bot commands in the main channel
+  if(message.channel.position == 0){
+    message.reply(`Please only use bot commands in bot channels. Thank you!`);
+    return;
+  }
   
   const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
   const command = args.shift().toLowerCase();
+  const currentGuild = message.guild;
+
+  await message.reply(`Command received`);
   
   if(command === "ping") {
     const m = await message.channel.send("Ping?");
     m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(bot.ping)}ms`);
-  }
-
-  if(command === "egan") {
-    var currGuild = bot.guilds.find(guild => guild.id === paddyID);
-    var egan = currGuild.members.find(member => member.displayName === "poggers").presence.status;
-    await message.channel.send(`Egan is ${egan}`);
   }
   
   if(command === "say") {
@@ -63,28 +61,6 @@ bot.on("message", async message => {
     message.delete().catch(O_o=>{}); 
     message.channel.send(sayMessage);
   }
-  
-  if(command === "stop"){
-    let member = message.mentions.members.first().speaking;
-    
-    if(member) 
-      console.log("Annoying member: ", member);
-  } 
-
-  if(command === "move"){
-    if(args){
-      console.log(args);
-      console.log(typeof(args[0]));
-    }
-    // if(message.mentions.users.size != 1 && message.mentions.users.size != 1){
-    //   await message.channel.send(`${message.author}, Please specify the correct arguments for the .move command`);
-    //   return;
-    // }
-
-    // if(channelType === "voice"){
-    //   console.log(typeof(message.mentions.users.first()));
-    // }
-  } 
 
   if(command === "stop"){
     let member = message.mentions.members.first().speaking;
@@ -143,7 +119,54 @@ bot.on("message", async message => {
     message.channel.bulkDelete(fetched)
       .catch(error => message.reply(`Couldn't delete messages because of: ${error}`));
 
-      message.reply(`${message.author.tag} deleted ${deleteCount} messages from ${message.channel}`);
+      message.reply(` deleted ${deleteCount} messages from ${message.channel}`);
+  }
+
+  if(command === "egan") {
+    var guild = message.guild;
+    var egan = guild.members.find(member => member.displayName === "poggers").presence.status;
+    await message.channel.send(`Egan is ${egan}`);
+  }
+
+  if(command === "move"){
+    let member = message.mentions.members.first();
+    let channelName = args[1];
+
+    //make sure we got the proper input
+    if(!member){
+      return message.reply(`Please mention a valid server member`);
+    }
+    else if(!channelName || channelName.charAt(1) === '#'){
+      return message.reply(`Please mention a valid voice channel!`);
+    }
+
+    //get guild channels
+    let guildChannels = currentGuild.channels;
+    let selectedChannel = guildChannels.find(channel => channel.name == channelName);
+
+    if(!selectedChannel){
+      return message.reply(`Please mention a valid voice channel!`);
+    }
+    else if(selectedChannel.type != "voice"){
+      return message.reply(`That channel is not a voice channel!`)
+    }
+
+    if(!member.voiceChannel){
+      return message.reply(`User must already be connected to a voice channel!`)
+    }
+
+    member.setVoiceChannel(selectedChannel.id)
+      .then(() => message.channel.send(`Moved ${member} to voice channel ${channelName}`));
+
+  } 
+
+  if(command === "stop"){
+    let member = message.mentions.members.first();
+    
+    if(!member) 
+      return message.reply(`Please mention a valid server member`);
+    
+    member.setMute(true, 'ur annoying');
   }
 });
 
