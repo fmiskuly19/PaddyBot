@@ -30,9 +30,13 @@ bot.on("message", async message => {
 
   //we dont want bot commands in the main channel
   if(message.channel.position == 0){
-    message.reply(`Please only use bot commands in bot channels. Thank you!`);
-    return;
+    return message.reply(`Please only use bot commands in bot channels. Thank you!`);
   }
+
+  // //we dont want normal messages in the bot channel
+  // if(message.channel.position == 1 && message.charAt(0) != config.prefix){
+  //   return message.reply(`Please only use bot commands in bot channels. Thank you!`);
+  // }
   
   const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
   const command = args.shift().toLowerCase();
@@ -93,6 +97,40 @@ bot.on("message", async message => {
         }
       ]
     };
+    message.channel.send({embed});
+  }
+
+  if(command === "info"){
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var dateTime = date+' '+time;
+    const embed = {
+      "color": 6143,
+      "timestamp": `${dateTime}`,
+      "footer": {
+        "icon_url": `${bot.user.displayAvatarURL}`,
+        "text": "Paddy bot"
+      },
+      // "thumbnail": {
+      //   "url": "../images/jslogo.png"
+      // },
+      "fields": [
+        {
+          "name": "Information",
+          "value": "PaddyBot is written in javascript using discord.js: a very powerful node.js module"
+        },
+        {
+          "name": "Resources",
+          "value": "https://anidiots.guide/ \nhttps://discord.js.org/#/docs/main/stable/general/welcome \nhttps://leovoel.github.io/embed-visualizer/"
+        },
+        {
+          "name": "Github",
+          "value": "[Github repo](https://github.com/fmiskuly19/PaddyBot)"
+        }
+      ]
+    };
+
     message.channel.send({embed});
   }
   
