@@ -42,6 +42,59 @@ bot.on("message", async message => {
     const m = await message.channel.send("Ping?");
     m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(bot.ping)}ms`);
   }
+
+  if(command === "help"){
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var dateTime = date+' '+time;
+    console.log(dateTime);
+    const embed = {
+      "title": "Thanks for using Paddy Bot!",
+      "description": "Below are a list of commands and how to use them!",
+      "color": 51711,
+      "timestamp": `${dateTime}`,
+      "footer": {
+        "icon_url": `${bot.user.displayAvatarURL}`,
+        "text": "PaddyBot"
+      },
+      "fields": [
+        {
+          "name": "```\n.help```",
+          "value": "List of commands"
+        },
+        {
+          "name": "```\n.info```",
+          "value": "Information about Paddy Bot"
+        },
+        {
+          "name": "```\n.say 'string'```",
+          "value": "Repeats user input"
+        },
+        {
+          "name": "```\n.ping```",
+          "value": "Gives ping to server and bot"
+        },
+        {
+          "name": "```\n.kick @user```",
+          "value": "Kicks the specified user if author of comment has high enough role"
+        },
+        {
+          "name": "```\n.ban @user```",
+          "value": "Bans the specified user if author of comment has high enough role"
+        },
+        {
+          "name": "```\n.egan```",
+          "value": "Will tell you if egan is online and what he is doing"
+        },
+        {
+          "name": "```\n.move @user 'channelname'```",
+          "value": "Moves user to specified channel name"
+        }
+      ]
+    };
+    message.channel.send({embed});
+  }
   
   if(command === "say") {
     const sayMessage = args.join(" ");
@@ -138,9 +191,7 @@ bot.on("message", async message => {
     }
 
     member.setVoiceChannel(selectedChannel.id)
-      .then(() => message.channel.send(`Moved ${member} to voice channel ${channelName}`))
-      .error(console.log);
-
+      .then(() => message.channel.send(`Moved ${member} to voice channel ${channelName}`));
   } 
 
   if(command === "stop"){
@@ -154,6 +205,7 @@ bot.on("message", async message => {
     
     member.setMute(true);
   }
+
 });
 
 bot.login(config.token);
