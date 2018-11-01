@@ -284,6 +284,15 @@ bot.on("message", async message => {
     await message.channel.send(`${member} was muted`);
   }
 
+  // TODO
+  // Add status function so everyone can access status
+  // change egan command to be more unique than status command
+  // .server command to show status of everyone in server
+  // .RL command, shows whos playing RL
+  // .R6S command, shows whos playing R6S
+  // difference between let and var, use them appropriately
+  // Calculate hours played for .status and .egan commands.
+
 });
 
 bot.login(config.token);
