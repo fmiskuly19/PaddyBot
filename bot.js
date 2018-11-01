@@ -98,6 +98,10 @@ bot.on("message", async message => {
         {
           "name": "```\n.stop @user```",
           "value": "Mutes specified user"
+        },
+        {
+          "name": "```\n.status @user```",
+          "value": "Gives status of specified user"
         }
       ]
     };
@@ -218,11 +222,16 @@ bot.on("message", async message => {
     let p = egan.presence;
     let color = (p.status === "online") ? 8978176 : 16711680;
     
-    let inGame = (p.game) ? p.game.name.trim() : "No";
-    let fields = (p.status === "online") ? [{"name": "Status","value": p.status},{"name": "In Game","value": inGame}] : [{"name": "Status","value": p.status}];
-    
-    if(p.game){
-      fields.push({"name": "Time", "value": "0hrs"});
+    var fields = [{"name": "Status", "value": p.status}];  
+      
+    if(p.status != "offline"){
+      let inGame = (p.game) ? p.game.name.trim() : "No";
+      fields.push({"name": "In Game","value": inGame})
+      if(p.game){
+        fields.push({"name": "Time", "value": "0hrs"});
+      }
+      let bother = (member.voiceChannel) ? "Yep" : "Nope";
+      fields.push({"name": "Bothering", "value": bother});
     }
 
     const embed = {
@@ -238,6 +247,47 @@ bot.on("message", async message => {
     };
 
     await message.channel.send({embed});
+  }
+
+  if(command === "status") {
+    
+        let member = message.mentions.members.first();
+    
+        if(!member){
+          return message.reply("Please mention a valid member of this server");
+        }
+    
+        //variables to use for embedded message
+        let memberAvatar = bot.users.find(user => user.id === member.id).displayAvatarURL;
+        let p = member.presence;
+        let color = 
+          (p.status === "online") ? 8978176 : 
+          (p.status === "offline") ? 16711680 :
+          16098851;
+        
+          var fields = [{"name": "Status", "value": p.status}];  
+          
+        if(p.status != "offline"){
+          let inGame = (p.game) ? p.game.name.trim() : "No";
+          fields.push({"name": "In Game","value": inGame})
+          if(p.game){
+            fields.push({"name": "Time", "value": "0hrs"});
+          }
+        }
+    
+        const embed = {
+          "author": {
+            "name": member.displayName,
+            "icon_url": memberAvatar
+          },
+          "color": color,
+          "thumbnail": {
+            "url": memberAvatar,
+          },
+          "fields": fields
+        };
+    
+        await message.channel.send({embed});
   }
 
   if(command === "move"){
@@ -285,7 +335,6 @@ bot.on("message", async message => {
   }
 
   // TODO
-  // Add status function so everyone can access status
   // change egan command to be more unique than status command
   // .server command to show status of everyone in server
   // .RL command, shows whos playing RL
