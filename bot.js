@@ -204,6 +204,7 @@ bot.on("message", async message => {
     }
     
     member.setMute(true);
+    await message.channel.send(`${member} was muted`);
   }
 
 });
