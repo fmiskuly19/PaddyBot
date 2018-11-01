@@ -94,6 +94,10 @@ bot.on("message", async message => {
         {
           "name": "```\n.move @user 'channelname'```",
           "value": "Moves user to specified channel name"
+        },
+        {
+          "name": "```\n.stop @user```",
+          "value": "Mutes specified user"
         }
       ]
     };
