@@ -52,7 +52,7 @@ bot.on("message", async message => {
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     var dateTime = date+' '+time;
-    console.log(dateTime);
+
     const embed = {
       "title": "Thanks for using Paddy Bot!",
       "description": "Below are a list of commands and how to use them!",
@@ -105,6 +105,7 @@ bot.on("message", async message => {
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     var dateTime = date+' '+time;
+
     const embed = {
       "color": 6143,
       "timestamp": `${dateTime}`,
@@ -200,9 +201,39 @@ bot.on("message", async message => {
   }
 
   if(command === "egan") {
-    var guild = message.guild;
-    var egan = guild.members.find(member => member.displayName === "poggers").presence.status;
-    await message.channel.send(`Egan is ${egan}`);
+
+    let guild = message.guild;
+    let egan = guild.members.find(member => member.id === "310638075875295235"); //get egan's member object from guild
+
+    if(!egan){
+      return message.reply(`Egan is not a member of this guild!`);
+    }
+
+    //variables to use for embedded message
+    let eganAvatar = bot.users.find(user => user.id === "310638075875295235").displayAvatarURL;
+    let p = egan.presence;
+    let color = (p.status === "online") ? 8978176 : 16711680;
+    
+    let inGame = (p.game) ? p.game.name.trim() : "No";
+    let fields = (p.status === "online") ? [{"name": "Status","value": p.status},{"name": "In Game","value": inGame}] : [{"name": "Status","value": p.status}];
+    
+    if(p.game){
+      fields.push({"name": "Time", "value": "0hrs"});
+    }
+
+    const embed = {
+      "author": {
+        "name": egan.displayName,
+        "icon_url": eganAvatar
+      },
+      "color": color,
+      "thumbnail": {
+        "url": eganAvatar,
+      },
+      "fields": fields
+    };
+
+    await message.channel.send({embed});
   }
 
   if(command === "move"){
@@ -222,7 +253,7 @@ bot.on("message", async message => {
     let selectedChannel = guildChannels.find(channel => channel.name == channelName);
 
     if(!selectedChannel){
-      return message.reply(`Please mention a valid voice channel!`);
+      return message.reply(`${selectedChannel} is not a valid voice channel!`);
     }
     else if(selectedChannel.type != "voice"){
       return message.reply(`That channel is not a voice channel!`)
