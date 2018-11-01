@@ -127,6 +127,10 @@ bot.on("message", async message => {
         {
           "name": "Github",
           "value": "[Github repo](https://github.com/fmiskuly19/PaddyBot)"
+        },
+        {
+          "name": "Host",
+          "value": "[Azure web app](https://paddybot.azurewebsites.net/)"
         }
       ]
     };
