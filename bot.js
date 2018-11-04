@@ -128,9 +128,6 @@ bot.on("message", async message => {
         "icon_url": `${bot.user.displayAvatarURL}`,
         "text": "Paddy bot"
       },
-      // "thumbnail": {
-      //   "url": "../images/jslogo.png"
-      // },
       "fields": [
         {
           "name": "Information",
@@ -146,7 +143,7 @@ bot.on("message", async message => {
         },
         {
           "name": "Host",
-          "value": "[Azure web app](https://paddybot.azurewebsites.net/)"
+          "value": "[Heroku](https://paddybot.herokuapp.com/)"
         }
       ]
     };
@@ -352,3 +349,11 @@ bot.on("message", async message => {
 });
 
 bot.login(process.env.DISCORD_KEY); //env variable is set through heroku cli to avoid exposing api key to public github repo
+
+//ping server every 5 minutes to avoid the heroku app going idle... is there a better solution for this?
+const http = require('http');
+
+setInterval(function(){
+  http.get("http://paddybot.herokuapp.com/");
+  console.log("Pinged heroku app at ", new Date().toLocaleString());
+},5000);
