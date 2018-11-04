@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const bot = new Discord.Client();
 const config = require("./config.json");
+require('dotenv').config();
 
 bot.on("ready", () => {
   console.log(`bot has started, with ${bot.users.size} users, in ${bot.channels.size} channels of ${bot.guilds.size} guilds.`); 
@@ -26,7 +27,7 @@ bot.on("message", async message => {
     
   if(message.author.bot) return;
   
-  if(message.content.indexOf(config.prefix) !== 0) return;
+  if(message.content.indexOf('.') !== 0) return;
 
   //we dont want bot commands in the main channel
   if(message.channel.position == 0){
@@ -344,4 +345,4 @@ bot.on("message", async message => {
 
 });
 
-bot.login(config.token);
+bot.login(process.env.DISCORD_KEY);

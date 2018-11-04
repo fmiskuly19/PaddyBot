@@ -17,7 +17,8 @@
   },
   "homepage": "https://github.com/fmiskuly19/PaddyBot#readme",
   "dependencies": {
-    "discord.js": "^11.4.2"
+    "discord.js": "^11.4.2",
+    "dotenv": "^6.1.0"
   },
   "devDependencies": {},
   "description": ""
