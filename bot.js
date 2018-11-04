@@ -1,6 +1,18 @@
 const Discord = require("discord.js");
 const bot = new Discord.Client();
-require('dotenv').config();
+
+const express = require('express');
+const app = express();
+const path = require('path')
+const PORT = process.env.PORT || 5000
+
+app.use(express.static(__dirname + '/public')); //allow for static content delivery
+
+app.get('/', function(req, res){
+  res.send("App running!"); 
+});
+
+app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 bot.on("ready", () => {
   console.log(`bot has started, with ${bot.users.size} users, in ${bot.channels.size} channels of ${bot.guilds.size} guilds.`); 
