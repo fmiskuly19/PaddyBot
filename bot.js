@@ -1,6 +1,5 @@
 const Discord = require("discord.js");
 const bot = new Discord.Client();
-const config = require("./config.json");
 require('dotenv').config();
 
 bot.on("ready", () => {
@@ -345,4 +344,4 @@ bot.on("message", async message => {
 
 });
 
-bot.login(process.env.DISCORD_KEY);
+bot.login(process.env.DISCORD_KEY); //env variable is set through heroku cli to avoid exposing api key to public github repo
