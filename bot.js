@@ -29,16 +29,6 @@ fs.readdir("./events/", (err, files) => {
 //   console.log(output);
 // });
 
-bot.on("guildCreate", guild => {
-  console.log(`New guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
-  bot.user.setActivity(`Serving ${bot.guilds.size} servers`);
-});
-
-bot.on("guildDelete", guild => {
-  console.log(`I have been removed from: ${guild.name} (id: ${guild.id})`);
-  bot.user.setActivity(`Serving ${bot.guilds.size} servers`);
-});
-
 bot.login(process.env.DISCORD_KEY); //env variable is set through heroku cli to avoid exposing api key to public github repo
 
 //ping server every 5 minutes to avoid the heroku app going idle... is there a better solution for this?

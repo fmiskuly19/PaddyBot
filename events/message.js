@@ -1,6 +1,4 @@
 module.exports = async (bot, message) => {
-
-    console.log("new module reached");
     
     if(message.author.bot) return;
     
