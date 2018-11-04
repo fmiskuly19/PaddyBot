@@ -2,18 +2,18 @@ const Discord = require("discord.js");
 const bot = new Discord.Client();
 const fs = require("fs");
 
-const express = require('express');
-const app = express();
-const path = require('path')
-const PORT = process.env.PORT || 5000
+// const express = require('express');
+// const app = express();
+// const path = require('path')
+// const PORT = process.env.PORT || 5000
 
-app.use(express.static(__dirname + '/public')); //allow for static content delivery
+// app.use(express.static(__dirname + '/public')); //allow for static content delivery
 
-app.get('/', function(req, res){
-  res.send("Paddybot up and running!"); 
-});
+// app.get('/', function(req, res){
+//   res.send("Paddybot up and running!"); 
+// });
 
-app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
+// app.listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 fs.readdir("./events/", (err, files) => {
   if (err) return console.error(err);
@@ -48,9 +48,9 @@ fs.readdir("./commands/", (err, files) => {
 bot.login(process.env.DISCORD_KEY); //env variable is set through heroku cli to avoid exposing api key to public github repo
 
 //ping server every 5 minutes to avoid the heroku app going idle... is there a better solution for this?
-const http = require('http');
+// const http = require('http');
 
-setInterval(function(){
-  http.get("http://paddybot.herokuapp.com/");
-  console.log("Pinged heroku app at ", new Date().toLocaleString());
-},300000);
+// setInterval(function(){
+//   http.get("http://paddybot.herokuapp.com/");
+//   console.log("Pinged heroku app at ", new Date().toLocaleString());
+// },300000);
