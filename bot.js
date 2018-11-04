@@ -237,7 +237,7 @@ bot.on("message", async message => {
       if(p.game){
         fields.push({"name": "Time", "value": "0hrs"});
       }
-      let bother = (member.voiceChannel) ? "Yep" : "Nope";
+      let bother = (egan.voiceChannel) ? "Yep" : "Nope";
       fields.push({"name": "Bothering", "value": bother});
     }
 
