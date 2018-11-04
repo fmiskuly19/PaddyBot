@@ -24,6 +24,22 @@ fs.readdir("./events/", (err, files) => {
   });
 });
 
+bot.commands = [];
+
+fs.readdir("./commands/", (err, files) => {
+  if (err) return console.error(err);
+  files.forEach(file => {
+    if (!file.endsWith(".js")) return;
+    // Load the command file itself
+    let f = require(`./commands/${file}`);
+    // Get just the command name from the file name
+    let commandName = file.split(".")[0];
+    console.log(`Attempting to load command ${commandName}`);
+    //store command in commands array.
+    bot.commands.push({name: commandName, f: f});
+  });
+});
+
 /// catch all raw packets
 // bot.on("raw", (output) => {
 //   console.log(output);

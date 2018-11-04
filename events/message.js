@@ -188,7 +188,10 @@ module.exports = async (bot, message) => {
       //variables to use for embedded message
       let eganAvatar = bot.users.find(user => user.id === "310638075875295235").displayAvatarURL;
       let p = egan.presence;
-      let color = (p.status === "online") ? 8978176 : 16711680;
+      let color = 
+        (p.status === "online") ? 8978176 : 
+        (p.status === "offline") ? 16711680 :
+        16098851;
       
       var fields = [{"name": "Status", "value": p.status}];  
         
