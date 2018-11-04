@@ -44,13 +44,8 @@ bot.on("message", async message => {
   if(message.channel.position == 0){
     return message.reply(`Please only use bot commands in bot channels. Thank you!`);
   }
-
-  // //we dont want normal messages in the bot channel
-  // if(message.channel.position == 1 && message.charAt(0) != config.prefix){
-  //   return message.reply(`Please only use bot commands in bot channels. Thank you!`);
-  // }
   
-  const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+  const args = message.content.slice(1).trim().split(/ +/g);
   const command = args.shift().toLowerCase();
   const currentGuild = message.guild;
   
