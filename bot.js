@@ -356,4 +356,4 @@ const http = require('http');
 setInterval(function(){
   http.get("http://paddybot.herokuapp.com/");
   console.log("Pinged heroku app at ", new Date().toLocaleString());
-},5000);
+},300000);
