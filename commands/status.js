@@ -14,8 +14,6 @@ module.exports.run = async (bot, message,args) => {
             (p.status === "offline") ? 16711680 :
                 16098851;
 
-    console.log(p);
-
     //by default, only field is online status
     var fields = [{ "name": "Status", "value": p.status }]; 
 
