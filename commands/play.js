@@ -3,6 +3,7 @@ const ytdl = require('ytdl-core');
 const fs = require('fs');
 const Youtube = require('simple-youtube-api');
 const yt = new Youtube(process.env.YOUTUBE_KEY);
+const ffmpeg = require('ffmpeg-binaries');
 
 // const spotifyApi = new SpotifyWebApi({
 //     clientId: process.env.SPOTIFY_CLIENT_ID,
