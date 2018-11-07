@@ -16,7 +16,7 @@ module.exports = async (bot, message) => {
     let cmd = bot.commands.find(command => command.info.name === commandName);
 
     if(!cmd) 
-      return message.reply(`Please enter a valid command!`);
+      return message.reply(`.${commandName} is not a valid command!`);
 
     cmd.run(bot, message, args);
     
