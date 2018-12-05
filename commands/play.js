@@ -46,12 +46,21 @@ module.exports.run = (bot,message,args) => {
             let broadcast = bot.createVoiceBroadcast();
             let song = ytdl(url);
             let songtitle = results[0].title;
+            console.log(results[0]);
         
             channel.join()
               .then(connection => {
                 broadcast.playStream(song);
                 const dispatcher = connection.playBroadcast(broadcast);
-                message.channel.send(`Playing ${songtitle} in ${channel.name}`);
+
+                const embed = {
+                    "color": 9961727,
+                    "fields": [
+                        {"name": "Now playing", "value":`${songtitle}`}
+                    ]
+                  };
+
+                    message.channel.send({embed});
               })
               .catch(console.error);
         })
