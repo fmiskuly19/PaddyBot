@@ -21,6 +21,7 @@
     "simple-youtube-api": "^5.0.2",
     "snoowrap": "^1.15.2",
     "spotify-web-api-node": "^4.0.0",
+    "steamapi": "^2.0.5",
     "ytdl-core": "^0.28.0"
   },
   "devDependencies": {},
