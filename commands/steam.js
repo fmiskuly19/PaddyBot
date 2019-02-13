@@ -14,6 +14,7 @@ module.exports.run = async (bot, message, args) => {
     var steamUser2PlayerSummary;
     var steamUser1GamesList = [];
     var steamUser2GamesList = [];
+    var chosenGameId;
 
     var getUser1 = function() {
         return steam.resolve(`https://steamcommunity.com/id/${steamUser1}`).then(id => {
@@ -39,7 +40,9 @@ module.exports.run = async (bot, message, args) => {
     var getUser1Profile = function(){
         return steam.getUserSummary(steamUserID1).then(summary => {
             // TODO make sure visibility flag is set to 3
-
+            // if(summary.visibilityState !== 3){
+            //     return('');
+            // }
             steamUser1PlayerSummary = summary;
             console.log(summary);
         });
@@ -70,6 +73,113 @@ module.exports.run = async (bot, message, args) => {
         });
     }
 
+    var displayUserInfo = function(){
+        //TODO get top played games
+
+        var gamesInCommon = steamUser2GamesList.filter(g => steamUser1GamesList.find(g2 => g.name === g2.name));
+        var gameChoice = gamesInCommon[Math.floor(Math.random() * gamesInCommon.length)]; 
+        chosenGameId = gameChoice.appID;
+
+        var steamUser1MostPlaytime = Math.max.apply(Math, steamUser1GamesList.map(function(g) { return g.playTime; }));
+        var steamUser1MostPlayedGame = steamUser1GamesList.find(function(g){ return g.playTime == steamUser1MostPlaytime; })
+
+        var steamUser2MostPlaytime = Math.max.apply(Math, steamUser2GamesList.map(function(g) { return g.playTime; }));
+        var steamUser2MostPlayedGame = steamUser2GamesList.find(function(g){ return g.playTime == steamUser2MostPlaytime; })
+        
+
+        var embed = {
+            "author": {
+                "name": steamUser1,
+                "url": `https://steamcommunity.com/id/${steamUser1}`,
+                "icon_url": steamUser1PlayerSummary.avatar.small                
+            },
+            "thumbnail": {
+                "url": steamUser1PlayerSummary.avatar.medium
+            },
+            "color": 62975,
+            "fields": [
+                {
+                    "name": 'Games',
+                    "value": `${steamUser1GamesList.length} games`,
+                },
+                {
+                    "name": 'Games in common',
+                    "value": gamesInCommon.length,
+                },
+                {
+                    "name": 'Most played game',
+                    "value": steamUser1MostPlayedGame.name,
+                },
+                {
+                    "name": 'Time played',
+                    "value": `${Math.floor(steamUser1MostPlayedGame.playTime/60)} hours`,
+                },
+            ]
+        };
+        
+        m.edit({ embed });
+
+        embed = {
+            "author": {
+                "name": steamUser2,
+                "url": `https://steamcommunity.com/id/${steamUser2}`,
+                "icon_url": steamUser2PlayerSummary.avatar.small                
+            },
+            "thumbnail": {
+                "url": steamUser2PlayerSummary.avatar.medium
+            },
+            "color": 3530521,
+            "fields": [
+                {
+                    "name": 'Games',
+                    "value": `${steamUser2GamesList.length} games`,
+                },
+                {
+                    "name": 'Games in common',
+                    "value": gamesInCommon.length,
+                },
+                {
+                    "name": 'Most played game',
+                    "value": steamUser2MostPlayedGame.name,
+                },
+                {
+                    "name": `Time played`,
+                    "value": `${Math.floor(steamUser2MostPlayedGame.playTime/60)} hours`,
+                },
+            ]
+        };
+
+        message.channel.send({ embed });
+    }
+
+    var getSteamGameById = function(){
+        return steam.getGameDetails(chosenGameId).then(game => {
+            message.channel.send({embed: {
+                "title": `You should play: ${game.name}!`,
+                "url": `https://store.steampowered.com/app/${game.steam_appid}`,
+                "description": game.short_description,
+                "color": 16374367,
+                "image": {
+                    "url": game.header_image
+                  },
+                "fields": [
+                    {
+                        "name": `User1 playtime`,
+                        "value": "value",
+                        "inline": true,
+                    },
+                    {
+                        "name": `User2 playtime`,
+                        "value": "value",
+                        "inline": true,
+                    },
+                ],
+            }});
+        });
+    }
+
+    const m = await message.channel.send("Loading...");
+
     getUser1()
         .then(getUser2)
         .then(() => {
@@ -82,86 +192,8 @@ module.exports.run = async (bot, message, args) => {
         })
         .then(getUser1OwnedGames)
         .then(getUser2OwnedGames)
-        .then(() => {
-            //TODO get top played games
-
-            var games = steamUser2GamesList.filter(g => steamUser1GamesList.find(g2 => g.name === g2.name));
-            var gameChoice = games[Math.floor(Math.random() * games.length)];  
-            console.log(games);
-            const embed = {
-                "color": 3530521,
-                "fields": [
-                    {
-                        "name": `Games in common`,
-                        "value": `${games.length} games`
-                    },
-                    {
-                        "name": `${steamUser1}'s most played game`,
-                        "value": "Rocket League with 400 hours played"
-                    },
-                    {
-                        "name": `${steamUser2}'s most played game`,
-                        "value": "Rocket League with 400 hours played"
-                    },
-                    {
-                        "name": `Game choice`,
-                        "value": `${steamUser1} and ${steamUser2} should play ${gameChoice.name} together!`
-                    },
-                ]
-            };
-            return message.channel.send({ embed });
-
-            // const embededMessage = {
-            //     "color": 3530521,
-            //     "fields": [
-            //         {
-            //             "name": `Games in common`,
-            //             "value": `${games.length} games`
-            //         },
-            //         {
-            //             "name": `${steamUser1}'s most played game`,
-            //             "value": "Rocket League with 400 hours played"
-            //         },
-            //         {
-            //             "name": `${steamUser2}'s most played game`,
-            //             "value": "Rocket League with 400 hours played"
-            //         },
-            //         {
-            //             "name": `Game choice`,
-            //             "value": `${steamUser1} and ${steamUser2} should play ${gameChoice.name} together!`
-            //         },
-            //     ]
-            // };
-            // message.channel.send(embededMessage).then(message => {
-            //     message.channel.send({embed: {
-            //         "author": {
-            //             "name": `${steamUser1PlayerSummary.nickname}`,
-            //             "url": `https://steamcommunity.com/id/${steamUser1}`,
-            //             "icon_url": `${steamUser1PlayerSummary.avatar.small}`
-            //         },
-            //         "thumbnail": {
-            //             "url": `${steamUser1PlayerSummary.avatar.large}`
-            //         },
-            //         "color": 3530521,
-            //         "fields": [
-            //             {
-            //                 "name": `Games`,
-            //                 "value": `${steamUser1GamesList.length}`
-            //             },
-            //             {
-            //                 "name": `Most played game`,
-            //                 "value": "Rocket League",
-            //                 "inline": true
-            //             },
-            //             {
-            //                 "name": `Hours`,
-            //                 "value": "400",
-            //                 "inline": true
-            //             },
-            //         ]
-            //     }});
-            // });
-        });
+        .then(displayUserInfo)
+        .then(getSteamGameById);
 };
 
 module.exports.info = {

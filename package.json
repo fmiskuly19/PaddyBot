@@ -14,15 +14,15 @@
   },
   "homepage": "https://github.com/fmiskuly19/PaddyBot#readme",
   "dependencies": {
-    "bufferutil": "^4.0.0",
+    "bufferutil": "^4.0.1",
     "discord.js": "^11.4.2",
     "ffmpeg-binaries": "^4.0.0",
     "opusscript": "0.0.6",
-    "simple-youtube-api": "^5.0.2",
+    "simple-youtube-api": "^5.1.1",
     "snoowrap": "^1.15.2",
     "spotify-web-api-node": "^4.0.0",
     "steamapi": "^2.0.5",
-    "ytdl-core": "^0.28.0"
+    "ytdl-core": "^0.28.3"
   },
   "devDependencies": {},
   "description": ""

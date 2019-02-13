@@ -43,6 +43,6 @@ module.exports.run = async (bot, message,args) => {
 
 module.exports.info = {
     name: "reddit",
-    usage: ".reddit",
+    usage: ".reddit 'subreddit'",
     description: "Gets top post of the day from user specified sub"
 };

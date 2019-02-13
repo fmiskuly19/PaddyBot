@@ -29,7 +29,7 @@ module.exports.run = (bot,message,args) => {
     let guild = message.guild;
     let member = guild.members.find(member => member.id === message.author.id);
     if(!member)
-        return message.reply(`something went wrong!`);
+        return message.reply(`Something went wrong!`);
     
     let channel = member.voiceChannel;
     if(!channel)
