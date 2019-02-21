@@ -76,18 +76,17 @@ module.exports.run = async (bot, message, args) => {
     var displayUserInfo = function(){
         //TODO get top played games
 
-        var gamesInCommon = steamUser2GamesList.filter(g => steamUser1GamesList.find(g2 => g.name === g2.name));
-        var gameChoice = gamesInCommon[Math.floor(Math.random() * gamesInCommon.length)]; 
+        let gamesInCommon = steamUser2GamesList.filter(g => steamUser1GamesList.find(g2 => g.name === g2.name));
+        let gameChoice = gamesInCommon[Math.floor(Math.random() * gamesInCommon.length)]; 
         chosenGameId = gameChoice.appID;
 
-        var steamUser1MostPlaytime = Math.max.apply(Math, steamUser1GamesList.map(function(g) { return g.playTime; }));
-        var steamUser1MostPlayedGame = steamUser1GamesList.find(function(g){ return g.playTime == steamUser1MostPlaytime; })
+        let steamUser1MostPlaytime = Math.max.apply(Math, steamUser1GamesList.map(function(g) { return g.playTime; }));
+        let steamUser1MostPlayedGame = steamUser1GamesList.find(function(g){ return g.playTime == steamUser1MostPlaytime; });
 
-        var steamUser2MostPlaytime = Math.max.apply(Math, steamUser2GamesList.map(function(g) { return g.playTime; }));
-        var steamUser2MostPlayedGame = steamUser2GamesList.find(function(g){ return g.playTime == steamUser2MostPlaytime; })
-        
+        let steamUser2MostPlaytime = Math.max.apply(Math, steamUser2GamesList.map(function(g) { return g.playTime; }));
+        let steamUser2MostPlayedGame = steamUser2GamesList.find(function(g){ return g.playTime == steamUser2MostPlaytime; })
 
-        var embed = {
+        let embed = {
             "author": {
                 "name": steamUser1,
                 "url": `https://steamcommunity.com/id/${steamUser1}`,
@@ -154,6 +153,14 @@ module.exports.run = async (bot, message, args) => {
 
     var getSteamGameById = function(){
         return steam.getGameDetails(chosenGameId).then(game => {
+
+            //compare by appID instead of name.. steam library and steam store name games differently
+            let steamUser1ChosenGamePlaytime = steamUser1GamesList.find(function(g){ return g.appID == game.steam_appid; });
+            let steamUser2ChosenGamePlaytime = steamUser2GamesList.find(function(g){ return g.appID == game.steam_appid; });
+
+            steamUser1ChosenGamePlaytime = Math.floor(steamUser1ChosenGamePlaytime.playTime/60);
+            steamUser2ChosenGamePlaytime = Math.floor(steamUser2ChosenGamePlaytime.playTime/60);
+
             message.channel.send({embed: {
                 "title": `You should play: ${game.name}!`,
                 "url": `https://store.steampowered.com/app/${game.steam_appid}`,
@@ -164,13 +171,13 @@ module.exports.run = async (bot, message, args) => {
                   },
                 "fields": [
                     {
-                        "name": `User1 playtime`,
-                        "value": "value",
+                        "name": `${steamUser1}'s playtime`,
+                        "value": `${steamUser1ChosenGamePlaytime} hours`,
                         "inline": true,
                     },
                     {
-                        "name": `User2 playtime`,
-                        "value": "value",
+                        "name": `${steamUser2}'s playtime`,
+                        "value": `${steamUser2ChosenGamePlaytime} hours`,
                         "inline": true,
                     },
                 ],
@@ -179,6 +186,19 @@ module.exports.run = async (bot, message, args) => {
     }
 
     const m = await message.channel.send("Loading...");
+
+    /*
+        I have no idea if this is proper practice for promise chaining....
+            Need to do more research on this
+
+        Tried to get it where it would pick another game if the chosen game was not a 
+            multiplayer game but got stuck in an endless promise loop. 
+            Definitely necessary functionality for this command.
+            
+        It would also be nice to have it send all embeds at once to avoid the
+            discord client slowly sending them and splitting them with a 
+            ----new messages--- banner as they were sent too far apart
+    */
 
     getUser1()
         .then(getUser2)
@@ -193,11 +213,14 @@ module.exports.run = async (bot, message, args) => {
         .then(getUser1OwnedGames)
         .then(getUser2OwnedGames)
         .then(displayUserInfo)
-        .then(getSteamGameById);
+        .then(getSteamGameById)
+        .catch(err => {
+            console.log(err);
+        });
 };
 
 module.exports.info = {
     name: "steamgames",
     usage: ".steamgames 'SteamID' 'SteamID2'",
-    description: "Gets common games from two users steam library and optionally picks one to play. Steam user must have a public facing profile."
+    description: "Gets common games from two users steam library and optionally picks one to play. Steam user must have a public facing profile an a custom url parameter ie: steamcommunity.com/id/yluksim."
 };
