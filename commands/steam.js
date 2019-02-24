@@ -10,7 +10,7 @@ module.exports.run = async (bot, message, args) => {
         return message.reply('Please provide more than one user. For help with PaddyBot commands, type .help!');
     }
 
-    const m = await message.channel.send({embed: {"description": "Getting Steam IDs...","color": 16772926}});
+    const m = await message.channel.send({embed: {"title": "Getting Steam IDs...","color": 16772926}});
     console.log("Getting Steam IDs...");
 
     let promises = [];
@@ -32,7 +32,7 @@ module.exports.run = async (bot, message, args) => {
         });
 
         //change loading message
-        m.edit({embed: {"description": "Getting Steam profiles...","color": 16772926}});
+        m.edit({embed: {"title": "Getting Steam profiles...","color": 16772926}});
         console.log("Getting Steam profiles...");
 
         return Promise.all(summaryPromises);
@@ -46,7 +46,7 @@ module.exports.run = async (bot, message, args) => {
         gamesPromises.push(profiles); //push profiles onto promises array to send them to next thenable
 
         //change loading message
-        m.edit({embed: {"description": "Getting Steam games...","color": 16772926}});
+        m.edit({embed: {"title": "Getting Steam games...","color": 16772926}});
         console.log("Getting Steam games...");
 
         return Promise.all(gamesPromises);
@@ -77,7 +77,7 @@ module.exports.run = async (bot, message, args) => {
 
         gamesDetailsPromises.push(steam.getGameDetails(gameChoice.appID));
 
-        m.edit({embed: {"description": "Picking game...","color": 16772926}});
+        m.edit({embed: {"title": "Picking game...","color": 16772926}});
         console.log("Picking game...");
         
         return Promise.all(gamesDetailsPromises);
@@ -89,7 +89,7 @@ module.exports.run = async (bot, message, args) => {
         let userInfo = results.pop();
         var embed;
 
-        m.edit({embed: {"description": "Finished loading results:","color": 16771840}});
+        m.edit({embed: {"title": "Finished loading results:","color": 16771840}});
         console.log("Finished loading results.");
 
         //only show user information if there are two users
@@ -111,6 +111,7 @@ module.exports.run = async (bot, message, args) => {
         }
 
         embed = new Discord.RichEmbed()
+            .setAuthor(bot.user.username,bot.user.displayAvatarURL, `https://paddybot.herokuapp.com`)
             .setTitle(`You should play: ${chosenGame.name}!`)
             .setURL(`https://store.steampowered.com/app/${chosenGame.steam_appid}`)
             .setDescription(chosenGame.short_description)
