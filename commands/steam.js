@@ -1,203 +1,134 @@
+const Discord = require("discord.js");
 const SteamAPI = require('steamapi');
 const steam = new SteamAPI(process.env.STEAM_SECRET);
 
 module.exports.run = async (bot, message, args) => {
-    if (args.length !== 2) {
-        return message.reply('Please provide the required parameters. For help with PaddyBot commands, type .help!');
+
+    console.log("Starting steam command");
+
+    if (args.length < 2) {
+        return message.reply('Please provide more than one user. For help with PaddyBot commands, type .help!');
     }
 
-    var steamUser1 = args[0];
-    var steamUser2 = args[1];
-    var steamUserID1;
-    var steamUserID2;
-    var steamUser1PlayerSummary;
-    var steamUser2PlayerSummary;
-    var steamUser1GamesList = [];
-    var steamUser2GamesList = [];
-    var chosenGameId;
+    const m = await message.channel.send({embed: {"description": "Getting Steam IDs...","color": 16772926}});
+    console.log("Getting Steam IDs...");
 
-    var getUser1 = function() {
-        return steam.resolve(`https://steamcommunity.com/id/${steamUser1}`).then(id => {
-            steamUserID1 = id;
-            console.log("steamUser1 from 1st promise:", steamUserID1);
+    let promises = [];
+
+    args.forEach(user => {
+        promises.push(steam.resolve(`https://steamcommunity.com/id/${user}`));
+    });
+
+    //start of promise chain
+    Promise.all(promises)
+    .then(steamIDs => {
+        return steamIDs;
+    })
+    .then(steamIDs => {
+
+        let summaryPromises = [];
+        steamIDs.forEach(id => {
+            summaryPromises.push(steam.getUserSummary(id));
+        });
+
+        //change loading message
+        m.edit({embed: {"description": "Getting Steam profiles...","color": 16772926}});
+        console.log("Getting Steam profiles...");
+
+        return Promise.all(summaryPromises);
+    })
+    .then(profiles => {
+
+        let gamesPromises = [];
+        profiles.forEach(profile => {
+            gamesPromises.push(steam.getUserOwnedGames(profile.steamID));
+        });
+        gamesPromises.push(profiles); //push profiles onto promises array to send them to next thenable
+
+        //change loading message
+        m.edit({embed: {"description": "Getting Steam games...","color": 16772926}});
+        console.log("Getting Steam games...");
+
+        return Promise.all(gamesPromises);
+    })
+    .then(results => {
+
+        let gamesDetailsPromises = [];
+        let profiles = results.pop();
+        let gamesLists = results;
+
+        let userInfo = profiles.map((profile, index) => {
+            return {p: profile, g: gamesLists[index]}
         })
-        .catch(err => {
-            console.log(err);
-            return message.reply(`Something went wrong! Please make sure that ${steamUser1} is a valid steam username.`)
-        });
-    }
 
-    var getUser2 = function(){
-        return steam.resolve(`https://steamcommunity.com/id/${steamUser2}`).then(id => {
-            steamUserID2 = id;
-            console.log("steamUser2 from 2st promise:", steamUserID2);
-        }).catch(err => {
-            console.log(err);
-            return message.reply(`Something went wrong! Please make sure that ${steamUser2} is a valid steam username.`)
+        gamesDetailsPromises.push(userInfo);
+        
+        let gamesInCommon = results.shift().filter(function(gameToCompare) {
+            return results.every(function(gameList) {
+                return gameList.find(game => game.appID === gameToCompare.appID);
+            });
         });
-    }
 
-    var getUser1Profile = function(){
-        return steam.getUserSummary(steamUserID1).then(summary => {
-            // TODO make sure visibility flag is set to 3
-            // if(summary.visibilityState !== 3){
-            //     return('');
-            // }
-            steamUser1PlayerSummary = summary;
-            console.log(summary);
-        });
-    }
+        if(gamesInCommon.length < 1){
+            throw new Error('Users had no games in common!');
+        }
 
-    var getUser2Profile = function(){
-        return steam.getUserSummary(steamUserID2).then(summary => {
-            steamUser2PlayerSummary = summary;
-            console.log(summary);
-        });
-    }
-    
-    var getUser1OwnedGames = function(){
-        return steam.getUserOwnedGames(steamUserID1).then(games => {
-            console.log("number of games: ", games.length);
-            steamUser1GamesList = games;
-        }).catch(err => {
-            console.log("Something went wrong!");
-        });
-    }
-
-    var getUser2OwnedGames = function(){
-        return steam.getUserOwnedGames(steamUserID2).then(games => {
-            console.log("number of games: ", games.length);
-            steamUser2GamesList = games;
-        }).catch(err => {
-            console.log(err);
-        });
-    }
-
-    var displayUserInfo = function(){
-        //TODO get top played games
-
-        var gamesInCommon = steamUser2GamesList.filter(g => steamUser1GamesList.find(g2 => g.name === g2.name));
         var gameChoice = gamesInCommon[Math.floor(Math.random() * gamesInCommon.length)]; 
-        chosenGameId = gameChoice.appID;
 
-        var steamUser1MostPlaytime = Math.max.apply(Math, steamUser1GamesList.map(function(g) { return g.playTime; }));
-        var steamUser1MostPlayedGame = steamUser1GamesList.find(function(g){ return g.playTime == steamUser1MostPlaytime; })
+        gamesDetailsPromises.push(steam.getGameDetails(gameChoice.appID));
 
-        var steamUser2MostPlaytime = Math.max.apply(Math, steamUser2GamesList.map(function(g) { return g.playTime; }));
-        var steamUser2MostPlayedGame = steamUser2GamesList.find(function(g){ return g.playTime == steamUser2MostPlaytime; })
+        m.edit({embed: {"description": "Picking game...","color": 16772926}});
+        console.log("Picking game...");
         
-
-        var embed = {
-            "author": {
-                "name": steamUser1,
-                "url": `https://steamcommunity.com/id/${steamUser1}`,
-                "icon_url": steamUser1PlayerSummary.avatar.small                
-            },
-            "thumbnail": {
-                "url": steamUser1PlayerSummary.avatar.medium
-            },
-            "color": 62975,
-            "fields": [
-                {
-                    "name": 'Games',
-                    "value": `${steamUser1GamesList.length} games`,
-                },
-                {
-                    "name": 'Games in common',
-                    "value": gamesInCommon.length,
-                },
-                {
-                    "name": 'Most played game',
-                    "value": steamUser1MostPlayedGame.name,
-                },
-                {
-                    "name": 'Time played',
-                    "value": `${Math.floor(steamUser1MostPlayedGame.playTime/60)} hours`,
-                },
-            ]
-        };
+        return Promise.all(gamesDetailsPromises);
         
-        m.edit({ embed });
+    })
+    .then(results => {
 
-        embed = {
-            "author": {
-                "name": steamUser2,
-                "url": `https://steamcommunity.com/id/${steamUser2}`,
-                "icon_url": steamUser2PlayerSummary.avatar.small                
-            },
-            "thumbnail": {
-                "url": steamUser2PlayerSummary.avatar.medium
-            },
-            "color": 3530521,
-            "fields": [
-                {
-                    "name": 'Games',
-                    "value": `${steamUser2GamesList.length} games`,
-                },
-                {
-                    "name": 'Games in common',
-                    "value": gamesInCommon.length,
-                },
-                {
-                    "name": 'Most played game',
-                    "value": steamUser2MostPlayedGame.name,
-                },
-                {
-                    "name": `Time played`,
-                    "value": `${Math.floor(steamUser2MostPlayedGame.playTime/60)} hours`,
-                },
-            ]
-        };
+        let chosenGame = results.pop();
+        let userInfo = results.pop();
+        var embed;
 
-        message.channel.send({ embed });
-    }
+        m.edit({embed: {"description": "Finished loading results:","color": 16771840}});
+        console.log("Finished loading results.");
 
-    var getSteamGameById = function(){
-        return steam.getGameDetails(chosenGameId).then(game => {
-            message.channel.send({embed: {
-                "title": `You should play: ${game.name}!`,
-                "url": `https://store.steampowered.com/app/${game.steam_appid}`,
-                "description": game.short_description,
-                "color": 16374367,
-                "image": {
-                    "url": game.header_image
-                  },
-                "fields": [
-                    {
-                        "name": `User1 playtime`,
-                        "value": "value",
-                        "inline": true,
-                    },
-                    {
-                        "name": `User2 playtime`,
-                        "value": "value",
-                        "inline": true,
-                    },
-                ],
-            }});
-        });
-    }
+        //only show user information if there are two users
+        if(userInfo.length < 3){
+            userInfo.forEach(user => {
+                let mostPlayedGameTime = Math.max.apply(Math, user.g.map(function(game) { return game.playTime; }));
+                let mostPlayedGame = user.g.find(g => g.playTime == mostPlayedGameTime);
 
-    const m = await message.channel.send("Loading...");
+                embed = new Discord.RichEmbed()
+                    .setAuthor(user.p.nickname, user.p.avatar.small, `https://steamcommunity.com/id/${user.p.steamID}`)
+                    .setThumbnail(user.p.avatar.medium)
+                    .setColor(16772926)
+                    .addField('Most played game', mostPlayedGame.name, true)
+                    .addField('Time played', `${Math.floor(mostPlayedGame.playTime/60)} hours`, true)
+                    .addField('Games', `${user.g.length} games`, true);
 
-    getUser1()
-        .then(getUser2)
-        .then(() => {
-            console.log("done geting users");
-        })
-        .then(getUser1Profile)
-        .then(getUser2Profile)
-        .then(() => {
-            console.log("done getting profiles")
-        })
-        .then(getUser1OwnedGames)
-        .then(getUser2OwnedGames)
-        .then(displayUserInfo)
-        .then(getSteamGameById);
+                message.channel.send({embed});
+            });
+        }
+
+        embed = new Discord.RichEmbed()
+            .setTitle(`You should play: ${chosenGame.name}!`)
+            .setURL(`https://store.steampowered.com/app/${chosenGame.steam_appid}`)
+            .setDescription(chosenGame.short_description)
+            .setColor(16772926)
+            .setImage(chosenGame.header_image);
+
+        message.channel.send({embed});
+
+        console.log(`Picked game: ${chosenGame.name}`);
+    })
+    .catch(err => {
+        console.log(err);
+        message.reply('Something went wrong! Please try again.');
+    });
 };
 
 module.exports.info = {
     name: "steamgames",
-    usage: ".steamgames 'SteamID' 'SteamID2'",
-    description: "Gets common games from two users steam library and optionally picks one to play. Steam user must have a public facing profile."
+    usage: ".steamgames 'SteamID1' 'SteamID2' etc.",
+    description: "Gets common games from Steam users steam library and picks one to play. Steam users must have a public facing profiles and a custom URL parameter set in their profile settings."
 };
